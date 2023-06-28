@@ -9,7 +9,7 @@ import BookController from "../components/book/controllers/book_controller";
 
 const container = new Container();
 container
-  .bind<BookServices>(BookServices)
+  .bind<IBookServices>(TYPES.BookService)
   .to(BookServices)
   .inRequestScope();
 

@@ -5,17 +5,14 @@ import { Request, Response, NextFunction } from "express";
 import { TYPES } from "../../../inversify/types";
 import IBookServices from "../services/ibook-service";
 import BookServices from "../services/book-service";
-import {
-  BadRequestError,
-  NotFoundError,
-} from "../../../utils/errors";
+import { NotFoundError } from "../../../utils/errors";
 import IBook from "../models/ibook";
 
 @injectable()
 export default class BookController {
-  private _bookService: BookServices;
+  private _bookService: IBookServices;
 
-  constructor(@inject(BookServices) bookServices: BookServices) {
+  constructor(@inject(TYPES.BookService) bookServices: BookServices) {
     this._bookService = bookServices;
   }
 
@@ -26,9 +23,9 @@ export default class BookController {
   ) {
     try {
       const allBook = await this._bookService.getAll();
-      response.status(200).json(allBook)
+      response.status(200).json(allBook);
     } catch (error) {
-      throw new BadRequestError(error);
+      next(error);
     }
   }
 
@@ -41,11 +38,11 @@ export default class BookController {
       let id = request.params.id;
       const book = await this._bookService.getById(id);
       if (book === null) {
-        return new NotFoundError("Not found");
+        throw new NotFoundError("Not found");
       }
-      response(200).json(book)
+      response(200).json(book);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -59,10 +56,10 @@ export default class BookController {
       const book: IBook = request.body;
 
       const updatedBook = await this._bookService.updateById(id, book);
-      if (updatedBook === null) return new NotFoundError("Not found Book");
+      if (updatedBook === null) throw new NotFoundError("Not found Book");
       else return updatedBook;
     } catch (error) {
-      throw new BadRequestError(error);
+      next(error);
     }
   }
 
@@ -76,7 +73,7 @@ export default class BookController {
       const createBook = await this._bookService.create(Book);
       return createBook;
     } catch (error) {
-      throw new BadRequestError(error);
+      next(error);
     }
   }
 }

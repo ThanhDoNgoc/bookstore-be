@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import IBook from "./ibook";
+import { Category } from "../utils/category.enum";
 
 const BookSchema: Schema = new Schema(
   {
@@ -8,6 +9,12 @@ const BookSchema: Schema = new Schema(
     quantity: { type: Number, required: true },
     price: { type: Number, required: true },
     description: { type: String, required: true },
+    category: {
+      type: String,
+      enum: Category,
+      default: Category.Comedy,
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
