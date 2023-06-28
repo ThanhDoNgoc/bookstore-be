@@ -17,18 +17,22 @@ export default class BookServices implements IBookServices {
   async find(query: BookQuery): Promise<IBook[]> {
     const queryObject: any = {};
     if (query.searchKey) {
-      queryObject.title = { $regex: query.searchKey, $option: "i" };
+      queryObject.title = { $regex: query.searchKey, $options: "i" };
     }
 
     if (query.category && query.category.length > 0) {
       queryObject.category = { $in: query.category };
     }
 
-    return await Book.find(queryObject);
+
+    return await Book.find(queryObject)
+      .skip(query.page * query.limit)
+      .limit(query.limit)
+      .exec();
   }
 
-  async getById(_id: string): Promise<IBook | null> {
-    return await Book.findById(_id);
+  async getById(id: string): Promise<IBook | null> {
+    return await Book.findOne({ _id: id });
   }
 
   async updateById(_id: string, book: IBook): Promise<Boolean | null> {

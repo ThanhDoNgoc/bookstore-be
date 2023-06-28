@@ -7,6 +7,8 @@ import IBookServices from "../services/ibook-service";
 import BookServices from "../services/book-service";
 import { NotFoundError } from "../../../utils/errors";
 import IBook from "../models/ibook";
+import HttpStatusCode from "../../../utils/http_status_codes";
+import BookQuery from "../utils/ibook.query";
 
 @injectable()
 export default class BookController {
@@ -23,7 +25,22 @@ export default class BookController {
   ) {
     try {
       const allBook = await this._bookService.getAll();
-      response.status(200).json(allBook);
+      response.status(HttpStatusCode.OK).json(allBook);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async findBooks(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { searchKey, category, page, limit } = request.query;
+      const bookQuery = new BookQuery(page, limit, searchKey, category);
+      const books = await this._bookService.find(bookQuery);
+      response.status(HttpStatusCode.OK).json(books);
     } catch (error) {
       next(error);
     }
@@ -35,12 +52,12 @@ export default class BookController {
     next: NextFunction
   ) {
     try {
-      let id = request.params.id;
+      const id = request.params.id;
       const book = await this._bookService.getById(id);
       if (book === null) {
         throw new NotFoundError("Not found");
       }
-      response(200).json(book);
+      response.status(HttpStatusCode.OK).json(book);
     } catch (error) {
       next(error);
     }
@@ -57,7 +74,10 @@ export default class BookController {
 
       const updatedBook = await this._bookService.updateById(id, book);
       if (updatedBook === null) throw new NotFoundError("Not found Book");
-      else return updatedBook;
+
+      response
+        .status(HttpStatusCode.OK)
+        .json({ message: "Book updated successfully" });
     } catch (error) {
       next(error);
     }
@@ -70,8 +90,10 @@ export default class BookController {
   ) {
     try {
       const Book: IBook = request.body;
-      const createBook = await this._bookService.create(Book);
-      return createBook;
+      await this._bookService.create(Book);
+      response
+        .status(HttpStatusCode.CREATED)
+        .json({ message: "Book created successfully" });
     } catch (error) {
       next(error);
     }
