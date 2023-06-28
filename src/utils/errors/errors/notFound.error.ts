@@ -1,5 +1,5 @@
 import BaseError from "../base.error";
-import HttpStatusCode from "../http_status_codes";
+import HttpStatusCode from "../../http_status_codes";
 
 export default class NotFoundError extends BaseError {
   propertyName: string;

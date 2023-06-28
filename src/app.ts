@@ -4,6 +4,15 @@ import { json } from "body-parser";
 import DatabaseConnection from "./database/db.connect";
 import container from "./inversify/inversify.config";
 import BookController from "./components/book/controllers/book_controller";
+import { checkSchema } from "express-validator";
+import {
+  bookQueryValidator,
+  createBookValidation,
+  editBookValidation,
+  getBookDetailValidation,
+} from "./utils/validators";
+import validate from "./utils/middlewares/validator.middleware";
+import HttpStatusCode from "./utils/http_status_codes";
 
 export default class App {
   private dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
@@ -38,17 +47,46 @@ export default class App {
     //Should have a file holding all book router but I'm kind of lazy so
     const bookController = container.resolve<BookController>(BookController);
 
-    this.app.get("", bookController.getAllBooks.bind(bookController));
-    this.app.get("/:id", bookController.getBookById.bind(bookController));
+    this.app.get("/all", bookController.getAllBooks.bind(bookController));
+
+    this.app.get(
+      "",
+      checkSchema(bookQueryValidator),
+      validate,
+      bookController.findBooks.bind(bookController)
+    );
+
+    this.app.get(
+      "/:id",
+      checkSchema(getBookDetailValidation),
+      validate,
+      bookController.getBookById.bind(bookController)
+    );
+
+    this.app.post(
+      "",
+      checkSchema(createBookValidation),
+      validate,
+      bookController.createBook.bind(bookController)
+    );
+
+    this.app.put(
+      "/:id",
+      checkSchema(editBookValidation),
+      validate,
+      bookController.updateBookById.bind(bookController)
+    );
   }
 
   private initGlobalErrorHandler() {
     this.app.use((err, req, res, next) => {
-      if (err.statusCode && err.message) {
+      if (err.statusCode) {
         res.status(err.status).json({ message: err.message });
       }
 
-      res.status(500).json({ message: "Internal server error" });
+      res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: "Internal server error" });
     });
   }
 }
