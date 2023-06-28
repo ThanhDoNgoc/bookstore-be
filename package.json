@@ -4,7 +4,10 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon src/index.ts",
+    "start:dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "start:prod": "node dist/index.js",
+    "dumb": "node src/dumb/book.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Thanh Do Ngoc",
@@ -14,12 +17,15 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-validator": "^7.0.1",
     "inversify": "^6.0.1",
     "logger": "^0.0.1",
     "mongoose": "^7.3.1",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^1.14.9",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.5"
   }
 }
