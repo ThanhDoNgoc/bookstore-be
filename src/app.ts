@@ -1,10 +1,13 @@
 import express, { Express } from "express";
 import cors from "cors";
 import { json } from "body-parser";
+import { checkSchema } from "express-validator";
+import YAML from "yaml";
+import swaggerUi from 'swagger-ui-express';
+import * as fs from "fs";
 import DatabaseConnection from "./database/db.connect";
 import container from "./inversify/inversify.config";
 import BookController from "./components/book/controllers/book_controller";
-import { checkSchema } from "express-validator";
 import {
   bookQueryValidator,
   createBookValidation,
@@ -30,6 +33,7 @@ export default class App {
     this.initMiddleware();
     this.initRoutes();
     this.initGlobalErrorHandler();
+    this.initSwagger();
 
     this.app.listen(this.port, () => {
       console.log(`Server listening on http://localhost:${this.port}`);
@@ -47,31 +51,31 @@ export default class App {
     //Should have a file holding all book router but I'm kind of lazy so
     const bookController = container.resolve<BookController>(BookController);
 
-    this.app.get("/all", bookController.getAllBooks.bind(bookController));
+    this.app.get("/api/all", bookController.getAllBooks.bind(bookController));
 
     this.app.get(
-      "",
+      "/api",
       checkSchema(bookQueryValidator),
       validate,
       bookController.findBooks.bind(bookController)
     );
 
     this.app.get(
-      "/:id",
+      "/api/:id",
       checkSchema(getBookDetailValidation),
       validate,
       bookController.getBookById.bind(bookController)
     );
 
     this.app.post(
-      "",
+      "/api",
       checkSchema(createBookValidation),
       validate,
       bookController.createBook.bind(bookController)
     );
 
     this.app.put(
-      "/:id",
+      "/api/:id",
       checkSchema(editBookValidation),
       validate,
       bookController.updateBookById.bind(bookController)
@@ -88,5 +92,15 @@ export default class App {
         .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
         .json({ message: "Internal server error" });
     });
+  }
+
+  private initSwagger() {
+    const apiDocument = fs.readFileSync('./src/swagger/openapi.yaml', "utf8");
+    const swaggerDocument = YAML.parse(apiDocument);
+    this.app.use(
+      "/api-docs",
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerDocument)
+    );
   }
 }
