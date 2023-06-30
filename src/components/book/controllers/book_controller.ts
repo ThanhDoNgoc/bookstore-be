@@ -38,6 +38,7 @@ export default class BookController {
   ) {
     try {
       const { search, category, page, limit } = request.query;
+      console.log(request.query)
       const bookQuery = new BookQuery(page, limit, search, category);
       const books = await this._bookService.find(bookQuery);
       response.status(HttpStatusCode.OK).json(books);

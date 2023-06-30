@@ -9,8 +9,7 @@ RUN npm ci --only=production
 FROM deps AS build
 WORKDIR /app
 COPY ./ ./
-RUN npm install
-RUN npm run build
+RUN npm install && npm run build
 
 
 #build app

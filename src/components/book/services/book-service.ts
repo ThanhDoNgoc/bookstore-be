@@ -14,21 +14,36 @@ export default class BookServices implements IBookServices {
     return await Book.find();
   }
 
-  async find(query: BookQuery): Promise<IBook[]> {
-    const queryObject: any = {};
+  async find(query: BookQuery): Promise<{ books: IBook[]; total: number }> {
+    const queryPipe: any[] = [];
+
     if (query.search) {
-      queryObject.title = { $regex: query.search, $options: "i" };
+      queryPipe.push({
+        $match: { title: { $regex: query.search, $options: "i" } },
+      });
     }
 
     if (query.category && query.category.length > 0) {
-      queryObject.category = { $in: query.category };
+      queryPipe.push({ $match: { category: { $in: [...query.category] } } });
     }
 
+    queryPipe.push({
+      $facet: {
+        books: [
+          { $skip: query.page * query.limit },
+          { $limit: query.limit },
+          { $project: { _id: 1, title: 1, price: 1, category: 1, image: 1 } },
+        ],
+        count: [{ $count: "total" }],
+      },
+    });
 
-    return await Book.find(queryObject)
-      .skip(query.page * query.limit)
-      .limit(query.limit)
-      .exec();
+    const results = await Book.aggregate(queryPipe);
+
+    return {
+      books: results[0].books,
+      total: results[0].count[0] ? results[0].count[0].total : 0,
+    };
   }
 
   async getById(id: string): Promise<IBook | null> {

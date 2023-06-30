@@ -8,7 +8,6 @@ export const bookQueryValidator: Schema = {
   },
   category: {
     in: ['query'],
-    isArray: true,
     optional: true,
   },
   limit: {
