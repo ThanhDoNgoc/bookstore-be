@@ -16,8 +16,8 @@ export default class BookServices implements IBookServices {
 
   async find(query: BookQuery): Promise<IBook[]> {
     const queryObject: any = {};
-    if (query.searchKey) {
-      queryObject.title = { $regex: query.searchKey, $options: "i" };
+    if (query.search) {
+      queryObject.title = { $regex: query.search, $options: "i" };
     }
 
     if (query.category && query.category.length > 0) {

@@ -3,7 +3,7 @@ import cors from "cors";
 import { json } from "body-parser";
 import { checkSchema } from "express-validator";
 import YAML from "yaml";
-import swaggerUi from 'swagger-ui-express';
+import swaggerUi from "swagger-ui-express";
 import * as fs from "fs";
 import DatabaseConnection from "./database/db.connect";
 import container from "./inversify/inversify.config";
@@ -16,6 +16,7 @@ import {
 } from "./utils/validators";
 import validate from "./utils/middlewares/validator.middleware";
 import HttpStatusCode from "./utils/http_status_codes";
+import BaseError from "./utils/errors/base.error";
 
 export default class App {
   private dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
@@ -49,7 +50,7 @@ export default class App {
 
   private initRoutes() {
     //Should have a file holding all book router but I'm kind of lazy so
-    const bookController = container.resolve<BookController>(BookController);
+    const bookController = container.get(BookController);
 
     this.app.get("/api/all", bookController.getAllBooks.bind(bookController));
 
@@ -84,8 +85,9 @@ export default class App {
 
   private initGlobalErrorHandler() {
     this.app.use((err, req, res, next) => {
-      if (err.statusCode) {
-        res.status(err.status).json({ message: err.message });
+      if (err instanceof BaseError) {
+        res.status(err.statusCode).json({ message: err.message });
+        return;
       }
 
       res
@@ -95,7 +97,7 @@ export default class App {
   }
 
   private initSwagger() {
-    const apiDocument = fs.readFileSync('./src/swagger/openapi.yaml', "utf8");
+    const apiDocument = fs.readFileSync("./src/swagger/openapi.yaml", "utf8");
     const swaggerDocument = YAML.parse(apiDocument);
     this.app.use(
       "/api-docs",

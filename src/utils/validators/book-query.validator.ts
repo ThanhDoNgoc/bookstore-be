@@ -1,7 +1,7 @@
 import { Schema } from 'express-validator';
 
 export const bookQueryValidator: Schema = {
-  searchKey: {
+  search: {
     in: ['query'],
     isString: true,
     optional: true,

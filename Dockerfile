@@ -1,9 +1,7 @@
 #build deps
 FROM node:18-alpine AS deps
-
 WORKDIR /app
 COPY package*.json ./
-
 RUN npm ci --only=production
 
 
@@ -13,6 +11,7 @@ WORKDIR /app
 COPY ./ ./
 RUN npm install
 RUN npm run build
+
 
 #build app
 FROM node:18-alpine 
