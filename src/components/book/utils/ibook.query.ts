@@ -15,7 +15,7 @@ export default class BookQuery {
     this.page = +page || 0,
     this.limit = +limit || 12,
     this.search = search,
-    this.category = category,
+    this.category = Array.isArray(category) ? category : [category],
     this.sort = sort || 'ASC'
   }
 }

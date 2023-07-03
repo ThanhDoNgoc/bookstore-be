@@ -3,9 +3,9 @@ import { Container } from "inversify";
 
 import { TYPES } from "./types";
 
-import IBookServices from "../components/book/services/ibook-service";
-import BookServices from "../components/book/services/book-service";
-import BookController from "../components/book/controllers/book_controller";
+import IBookServices from "../components/book/services/ibook-services";
+import BookServices from "../components/book/services/book-services";
+import BookController from "../components/book/controllers/book-controller";
 
 const container = new Container();
 container

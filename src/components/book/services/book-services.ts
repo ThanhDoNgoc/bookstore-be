@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import IBookServices from "./ibook-service";
+import IBookServices from "./ibook-services";
 import Book from "../models/book-model";
 import IBook from "../models/ibook";
 import BookQuery from "../utils/ibook.query";
@@ -23,8 +23,8 @@ export default class BookServices implements IBookServices {
       });
     }
 
-    if (query.category && query.category.length > 0) {
-      queryPipe.push({ $match: { category: { $in: [...query.category] } } });
+    if (query.category[0]) {
+      queryPipe.push({ $match: { category: { $in: query.category } } });
     }
 
     queryPipe.push({

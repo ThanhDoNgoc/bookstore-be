@@ -7,7 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import * as fs from "fs";
 import DatabaseConnection from "./database/db.connect";
 import container from "./inversify/inversify.config";
-import BookController from "./components/book/controllers/book_controller";
+import BookController from "./components/book/controllers/book-controller";
 import {
   bookQueryValidator,
   createBookValidation,
@@ -85,6 +85,7 @@ export default class App {
 
   private initGlobalErrorHandler() {
     this.app.use((err, req, res, next) => {
+      console.log(err)
       if (err instanceof BaseError) {
         res.status(err.statusCode).json({ message: err.message });
         return;
