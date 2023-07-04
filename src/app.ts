@@ -17,6 +17,7 @@ import {
 import validate from "./utils/middlewares/validator.middleware";
 import HttpStatusCode from "./utils/http_status_codes";
 import BaseError from "./utils/errors/base.error";
+import OrderController from "./components/order/controllers/order-controller";
 
 export default class App {
   private dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
@@ -51,6 +52,12 @@ export default class App {
   private initRoutes() {
     //Should have a file holding all book router but I'm kind of lazy so
     const bookController = container.get(BookController);
+    const orderController = container.get(OrderController);
+
+    this.app.post(
+      "/api/order",
+      orderController.createOrder.bind(orderController)
+    );
 
     this.app.get("/api/all", bookController.getAllBooks.bind(bookController));
 
@@ -85,7 +92,7 @@ export default class App {
 
   private initGlobalErrorHandler() {
     this.app.use((err, req, res, next) => {
-      console.log(err)
+      console.log(err);
       if (err instanceof BaseError) {
         res.status(err.statusCode).json({ message: err.message });
         return;
