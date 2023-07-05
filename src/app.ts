@@ -18,9 +18,11 @@ import validate from "./utils/middlewares/validator.middleware";
 import HttpStatusCode from "./utils/http_status_codes";
 import BaseError from "./utils/errors/base.error";
 import OrderController from "./components/order/controllers/order-controller";
+import KafkaService from "./kafka/kafka.services";
 
 export default class App {
   private dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
+  private kafka: KafkaService = KafkaService.getInstance();
 
   private app: Express;
   private port = process.env.PORT || 3000;
@@ -31,7 +33,8 @@ export default class App {
 
   public async start() {
     await this.dbConnection.connect();
-
+    await this.kafka.connect();
+    
     this.initMiddleware();
     this.initRoutes();
     this.initGlobalErrorHandler();
@@ -44,7 +47,6 @@ export default class App {
 
   private initMiddleware() {
     this.app.use(cors());
-    //this.app.use(json());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
   }
