@@ -3,11 +3,20 @@ import IBookServices from "./ibook-services";
 import Book from "../models/book-model";
 import IBook from "../models/ibook";
 import BookQuery from "../utils/ibook.query";
+import KafkaService from "../../../kafka/kafka.services";
+import { KafkaTopics } from "../../../kafka/topics";
 
 @injectable()
 export default class BookServices implements IBookServices {
+  private kafkaService = KafkaService.getInstance();
+
   async create(book: IBook): Promise<IBook> {
-    return await Book.create(book);
+    const newBook = await Book.create(book);
+    this.kafkaService.sendMessage(KafkaTopics.Book, {
+      book: newBook,
+      type: "create",
+    });
+    return newBook;
   }
 
   async getAll(): Promise<IBook[]> {
@@ -51,7 +60,12 @@ export default class BookServices implements IBookServices {
   }
 
   async updateById(_id: string, book: IBook): Promise<Boolean | null> {
-    return await Book.findByIdAndUpdate(_id, book);
+    const updateBook = await Book.findByIdAndUpdate(_id, book);
+    this.kafkaService.sendMessage(KafkaTopics.Book, {
+      book: updateBook,
+      type: "update",
+    });
+    return updateBook ? true : false;
   }
 
   async delete(_id: string): Promise<IBook> {
