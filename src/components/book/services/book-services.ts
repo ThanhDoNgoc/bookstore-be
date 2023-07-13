@@ -12,8 +12,18 @@ export default class BookServices implements IBookServices {
 
   async create(book: IBook): Promise<IBook> {
     const newBook = await Book.create(book);
+
     this.kafkaService.sendMessage(KafkaTopics.Book, {
-      book: newBook,
+      book: {
+        title: newBook.title,
+        image: newBook.image,
+        quantity: newBook.quantity,
+        price: newBook.price,
+        description: newBook.description,
+        category: newBook.category,
+        isDeleted: newBook.isDeleted,
+        _id: newBook._id.toString(),
+      },
       type: "create",
     });
     return newBook;
@@ -62,7 +72,16 @@ export default class BookServices implements IBookServices {
   async updateById(_id: string, book: IBook): Promise<Boolean | null> {
     const updateBook = await Book.findByIdAndUpdate(_id, book);
     this.kafkaService.sendMessage(KafkaTopics.Book, {
-      book: updateBook,
+      book: {
+        title: updateBook.title,
+        image: updateBook.image,
+        quantity: updateBook.quantity,
+        price: updateBook.price,
+        description: updateBook.description,
+        category: updateBook.category,
+        isDeleted: updateBook.isDeleted,
+        _id: updateBook._id.toString(),
+      },
       type: "update",
     });
     return updateBook ? true : false;

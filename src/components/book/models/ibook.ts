@@ -6,5 +6,6 @@ export default interface IBook extends Document {
   quantity: number;
   description: string;
   image: string;
+  category: string;
   isDeleted?: boolean;
 }
